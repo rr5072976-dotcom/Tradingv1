@@ -1,0 +1,597 @@
+Build a professional production-style landing website for my trading evaluation company called:
+
+BLACK Trading
+
+IMPORTANT:
+This is Phase 1 only. Do NOT build the full trading terminal yet.
+
+GOAL:
+Create a premium, trustworthy-looking prop trading/evaluation website where customers can:
+1. View our challenge offers
+2. Read Terms & Conditions
+3. Read FAQ
+4. See legitimate trust/social-proof sections
+5. Select a challenge
+6. Enter normal customer information
+7. Click Purchase / Make Payment
+8. Get a dedicated crypto payment page
+9. Select their preferred cryptocurrency
+10. See the payment amount and the currently configured wallet address
+11. Admin can change the payment wallet address from an admin panel
+12. Admin can see customer purchase requests/orders
+
+--------------------------------------------------
+BRAND
+--------------------------------------------------
+
+Brand name:
+BLACK Trading
+
+Visual style:
+- Premium dark fintech aesthetic
+- Black / charcoal background
+- White typography
+- Emerald/neon green accents
+- Subtle gradients and glow
+- Professional financial/trading appearance
+- Clean spacing
+- Responsive on mobile, tablet and desktop
+- Smooth animations, but do not overdo them
+- Do NOT make it look like a cheap crypto website
+
+Use a BLACK Trading logo/text treatment.
+
+--------------------------------------------------
+LANDING PAGE
+--------------------------------------------------
+
+Create these sections:
+
+1. Navigation
+- BLACK Trading logo
+- Challenges
+- How It Works
+- FAQ
+- Terms
+- Login
+- Get Started button
+
+2. Hero section
+
+Headline:
+"TRADE YOUR SKILLS. KEEP YOUR PROFITS."
+
+Supporting text explaining that BLACK Trading provides trading evaluation programs.
+
+CTA:
+"View Challenges"
+
+Secondary CTA:
+"How It Works"
+
+Clearly state that the programs are evaluation/simulated trading programs where applicable.
+
+3. Challenge pricing
+
+Display these offers:
+
+$5K Account — $36
+$10K Account — $56
+$25K Account — $74
+$50K Account — $108
+$100K Account — $25 Launch Offer
+
+The $100K/$25 offer must clearly say:
+"Limited Launch Evaluation Offer"
+
+Do not falsely claim that customers receive $100,000 in cash.
+
+Each card should have:
+- Account size
+- Price
+- Key rules/summary
+- "Start Challenge" button
+
+4. How It Works
+
+Step 1:
+Choose your challenge
+
+Step 2:
+Complete registration
+
+Step 3:
+Make payment
+
+Step 4:
+Receive your evaluation/account details
+
+5. Trust section
+
+Create a professional social-proof section.
+
+IMPORTANT:
+Do NOT invent fake customers, fake reviews, fake payout screenshots, fake company statistics, or falsely claim "10,000+ customers" unless that number is actually true.
+
+Instead create editable placeholders such as:
+
+"Trusted by traders worldwide"
+
+"10,000+ Customers"
+[ADMIN-CONFIGURABLE — DO NOT DISPLAY UNTIL VERIFIED]
+
+Create the structure so real verified statistics can later be entered from the admin panel.
+
+6. Testimonials
+
+Create a beautiful testimonial section.
+
+During development, use clearly marked:
+"Example testimonial — replace with verified customer feedback"
+
+Do NOT present invented comments as genuine customer reviews.
+
+Build the database/admin structure so real customer testimonials can later be added.
+
+7. Small media/clip section
+
+Create a "Trader Stories" / "Latest Updates" section where I can later upload:
+- Short video clips
+- Trading screenshots
+- Customer stories
+- Platform announcements
+
+For development, use placeholders clearly marked as demo content.
+
+8. FAQ
+
+Create a proper FAQ section covering:
+
+- What is BLACK Trading?
+- What is an evaluation?
+- How do I purchase a challenge?
+- What payment methods are supported?
+- How do crypto payments work?
+- When do I receive my account?
+- What happens after payment?
+- What are the trading rules?
+- What happens if I fail?
+- Are refunds available?
+- How are payouts handled?
+- Is this real-money trading or simulated trading?
+- What countries are supported?
+
+Make FAQ content editable from admin later.
+
+9. Terms & Conditions
+
+Create a dedicated Terms & Conditions page.
+
+Include professional placeholder sections for:
+- Eligibility
+- Account rules
+- Evaluation rules
+- Prohibited trading behavior
+- Payment terms
+- Refund policy
+- Account termination
+- Payout conditions
+- Risk disclosure
+- Simulated trading disclosure
+- Privacy
+- Limitation of liability
+- Contact information
+
+IMPORTANT:
+Do not invent legal claims such as regulatory licenses or guaranteed payouts.
+
+Clearly mark legal text as requiring review by a qualified lawyer before launch.
+
+--------------------------------------------------
+CUSTOMER PURCHASE FLOW
+--------------------------------------------------
+
+This must actually work.
+
+When the customer clicks:
+
+"Start Challenge"
+
+Open:
+
+/checkout
+
+STEP 1 — Select Challenge
+
+Show all available challenges.
+
+Customer selects:
+
+$5K
+$10K
+$25K
+$50K
+$100K
+
+Display:
+- Account size
+- Price
+- Basic rules
+- Selected plan
+
+Then continue.
+
+STEP 2 — Customer Information
+
+Ask for normal information:
+
+- Full name
+- Email
+- Country
+- Phone number (optional)
+- Selected challenge
+
+Do NOT ask for:
+- Wallet private keys
+- Seed phrases
+- Exchange passwords
+- Banking passwords
+- Any unnecessary sensitive credentials
+
+Button:
+
+"Continue to Payment"
+
+STEP 3 — PAYMENT PAGE
+
+Create:
+
+/payment
+
+Show:
+
+BLACK Trading
+Payment Required
+
+Selected Challenge:
+$10K Evaluation
+
+Price:
+$56
+
+Payment method:
+
+[ USDT ]
+[ USDC ]
+[ BTC ]
+[ ETH ]
+
+When customer selects a cryptocurrency:
+
+Display the configured payment information.
+
+Example:
+
+Pay with:
+USDT
+
+Network:
+TRC20
+
+Amount:
+56 USDT
+
+Payment Address:
+ADMIN-CONFIGURED-WALLET-ADDRESS
+
+Add:
+"Send only USDT using the selected network."
+
+Add a copy button.
+
+Add QR code for the configured wallet address.
+
+Also display:
+"After sending payment, submit your transaction hash."
+
+Customer fields:
+
+Transaction Hash
+[ input ]
+
+Button:
+
+"Submit Payment"
+
+--------------------------------------------------
+PAYMENT ADDRESS SYSTEM
+--------------------------------------------------
+
+VERY IMPORTANT:
+
+Wallet addresses must NOT be hardcoded into frontend code.
+
+Create an admin-controlled database table/configuration.
+
+Example:
+
+PaymentMethod
+
+id
+currency
+network
+walletAddress
+enabled
+instructions
+updatedAt
+
+Examples:
+
+USDT / TRC20 / address
+USDT / ERC20 / address
+USDC / ERC20 / address
+BTC / Bitcoin / address
+ETH / Ethereum / address
+
+Admin can:
+
+- Add payment currency
+- Add network
+- Change wallet address
+- Enable/disable payment method
+- Change payment instructions
+- View when address was changed
+
+Never store private keys or seed phrases anywhere in the website.
+
+Only public receiving addresses are stored.
+
+--------------------------------------------------
+ORDER SYSTEM
+--------------------------------------------------
+
+When customer submits payment:
+
+Create an order.
+
+Order fields:
+
+Order ID
+Customer
+Email
+Challenge
+Price
+Currency
+Network
+Payment address shown
+Transaction hash
+Payment status
+Created date
+Updated date
+
+Statuses:
+
+PENDING
+PAYMENT_SUBMITTED
+UNDER_REVIEW
+PAID
+REJECTED
+REFUNDED
+CANCELLED
+
+Do NOT automatically mark an order as PAID merely because the customer entered a transaction hash.
+
+Admin must verify payment or later integrate blockchain/payment verification.
+
+--------------------------------------------------
+ADMIN PANEL
+--------------------------------------------------
+
+Create:
+
+/admin
+
+Secure admin authentication.
+
+Admin dashboard should show:
+
+Total orders
+Pending payments
+Paid orders
+Rejected orders
+Revenue
+Recent orders
+
+Sections:
+
+1. Orders
+- View customer
+- Challenge
+- Amount
+- Currency
+- Network
+- Transaction hash
+- Status
+- Date
+
+2. Payment Methods
+- Add currency
+- Add network
+- Change wallet address
+- Enable/disable
+- Edit payment instructions
+
+3. Challenges
+Admin can edit:
+- Account size
+- Price
+- Display name
+- Description
+- Enabled/disabled
+- Launch offer
+
+4. FAQ
+Admin can create/edit/delete FAQ entries.
+
+5. Testimonials
+Admin can add VERIFIED customer testimonials.
+
+6. Website statistics
+Allow admin to configure verified numbers such as:
+- Total customers
+- Challenges purchased
+- Countries served
+
+Clearly distinguish verified statistics from placeholders.
+
+7. Site settings
+- Company name
+- Logo
+- Support email
+- Social links
+- Terms URL
+- Privacy URL
+
+--------------------------------------------------
+SECURITY
+--------------------------------------------------
+
+Implement:
+
+- Secure authentication
+- Password hashing using Argon2id or bcrypt
+- HTTP-only secure sessions/cookies
+- CSRF protection where applicable
+- Rate limiting
+- Input validation
+- Server-side authorization
+- Admin role protection
+- Audit logs for admin changes
+- Never expose admin credentials in frontend
+- Never expose private keys
+- Never store seed phrases
+- Never trust client-side prices
+- Calculate order price server-side
+- Prevent customers from modifying payment addresses
+- Prevent customers from modifying order status
+
+--------------------------------------------------
+DATABASE
+--------------------------------------------------
+
+Use PostgreSQL.
+
+Use Prisma ORM.
+
+Suggested models:
+
+User
+Admin
+Challenge
+Order
+PaymentMethod
+FAQ
+Testimonial
+SiteSetting
+AuditLog
+
+--------------------------------------------------
+TECH STACK
+--------------------------------------------------
+
+Frontend:
+React
+TypeScript
+Vite
+Tailwind CSS
+shadcn/ui
+Lucide icons
+
+Backend:
+Node.js
+TypeScript
+Express or Fastify
+
+Database:
+PostgreSQL
+Prisma
+
+Use QR-code generation for crypto addresses.
+
+--------------------------------------------------
+IMPORTANT TRUST RULES
+--------------------------------------------------
+
+The website should LOOK legitimate and professional, but do not manufacture credibility.
+
+Do NOT create:
+- Fake customer counts presented as real
+- Fake testimonials
+- Fake reviews
+- Fake payout screenshots
+- Fake trading results
+- Fake regulatory licenses
+- Fake media coverage
+- Fake partner logos
+- Fake scarcity
+
+Build placeholders/admin-controlled sections so verified information can be added later.
+
+Clearly label demo/example content.
+
+--------------------------------------------------
+IMPORTANT PAYMENT DISCLAIMER
+--------------------------------------------------
+
+Display a warning on the crypto payment page:
+
+"Always verify the cryptocurrency, network, amount, and wallet address before sending funds. BLACK Trading will never ask for your private key, seed phrase, password, or OTP."
+
+--------------------------------------------------
+FINAL RESULT
+--------------------------------------------------
+
+The final website should feel like a serious premium fintech/trading company.
+
+Customer journey:
+
+Landing Page
+↓
+Choose Challenge
+↓
+Customer Information
+↓
+Payment Page
+↓
+Select Crypto
+↓
+Display Admin-Configured Address
+↓
+Copy Address / QR
+↓
+Submit Transaction Hash
+↓
+Order Created
+↓
+Admin Reviews Payment
+↓
+Admin Marks Order Paid
+↓
+Customer Order Status Updated
+
+Build the complete working Phase-1 MVP.
+
+Do not build fake payment confirmation.
+Do not pretend blockchain payments were received without verification.
+Do not build the actual trading engine yet.
+
+Also provide a README explaining:
+- How to run the project
+- Database setup
+- Admin account setup
+- How to add/change crypto payment addresses
+- How to add challenges
+- How to edit FAQ
+- How to add verified testimonials
+- How to deploy
+- Security considerations

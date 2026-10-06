@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "BLACK Trading"
+description = "A premium trading evaluation website where customers can compare challenges, register and submit crypto payment proofs, while administrators manage orders, payment addresses, rules, FAQs, testimonials, and site settings."
+version = "1.0.0"
+id = "artifacts/black-trading"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 25835
+
+[services.development]
+run = "pnpm --filter @workspace/black-trading run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/black-trading", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/black-trading/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "25835"
+BASE_PATH = "/"

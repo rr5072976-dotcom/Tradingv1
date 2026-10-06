@@ -3,13 +3,19 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: BLACK Trading evaluation, checkout, payment, and administration API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: public
+    description: Public website content and payment options
+  - name: orders
+    description: Customer checkout and payment submissions
+  - name: admin
+    description: Admin-only management operations
 paths:
   /healthz:
     get:
@@ -24,7 +30,590 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /public/site:
+    get:
+      operationId: getPublicSite
+      tags: [public]
+      summary: Get published website content
+      responses:
+        "200":
+          description: Public website content
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PublicSite"
+  /public/payment-methods:
+    get:
+      operationId: listPublicPaymentMethods
+      tags: [public]
+      summary: List enabled payment methods and public receiving details
+      responses:
+        "200":
+          description: Enabled payment methods
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PaymentMethod"
+  /orders:
+    post:
+      operationId: createOrder
+      tags: [orders]
+      summary: Create a pending order using the server-side challenge price
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OrderInput"
+      responses:
+        "201":
+          description: Pending order created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+        "400":
+          description: Invalid customer information
+        "404":
+          description: Challenge is unavailable
+  /orders/{orderId}/payment:
+    get:
+      operationId: getOrderPayment
+      tags: [orders]
+      summary: Get limited payment-page details for an order
+      parameters:
+        - $ref: "#/components/parameters/OrderId"
+      responses:
+        "200":
+          description: Order details safe for the payment page
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrderPayment"
+        "404":
+          description: Order not found
+    post:
+      operationId: submitPayment
+      tags: [orders]
+      summary: Submit a transaction hash for manual review
+      parameters:
+        - $ref: "#/components/parameters/OrderId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PaymentSubmissionInput"
+      responses:
+        "200":
+          description: Payment submitted for review
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrderPayment"
+        "400":
+          description: Invalid payment submission
+        "404":
+          description: Order or payment method not found
+  /admin/dashboard:
+    get:
+      operationId: getAdminDashboard
+      tags: [admin]
+      summary: Get order totals and recent activity
+      security:
+        - ClerkSession: []
+      responses:
+        "200":
+          description: Dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminDashboard"
+        "401":
+          description: Sign-in required
+        "403":
+          description: Admin access required
+  /admin/orders:
+    get:
+      operationId: listAdminOrders
+      tags: [admin]
+      summary: List customer orders
+      security:
+        - ClerkSession: []
+      responses:
+        "200":
+          description: Orders
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Order"
+        "401":
+          description: Sign-in required
+        "403":
+          description: Admin access required
+  /admin/orders/{orderId}:
+    patch:
+      operationId: updateAdminOrder
+      tags: [admin]
+      summary: Update order review status
+      security:
+        - ClerkSession: []
+      parameters:
+        - $ref: "#/components/parameters/OrderId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OrderStatusUpdate"
+      responses:
+        "200":
+          description: Updated order
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+        "401":
+          description: Sign-in required
+        "403":
+          description: Admin access required
+        "404":
+          description: Order not found
+  /admin/challenges:
+    get:
+      operationId: listAdminChallenges
+      tags: [admin]
+      summary: List all challenges
+      security:
+        - ClerkSession: []
+      responses:
+        "200":
+          description: Challenges
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Challenge"
+    post:
+      operationId: createChallenge
+      tags: [admin]
+      summary: Create a challenge
+      security:
+        - ClerkSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChallengeInput"
+      responses:
+        "201":
+          description: Created challenge
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Challenge"
+  /admin/challenges/{id}:
+    patch:
+      operationId: updateChallenge
+      tags: [admin]
+      summary: Edit a challenge
+      security:
+        - ClerkSession: []
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChallengeInput"
+      responses:
+        "200":
+          description: Updated challenge
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Challenge"
+    delete:
+      operationId: deleteChallenge
+      tags: [admin]
+      summary: Delete a challenge
+      security:
+        - ClerkSession: []
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "204":
+          description: Challenge deleted
+  /admin/payment-methods:
+    get:
+      operationId: listAdminPaymentMethods
+      tags: [admin]
+      summary: List configured payment methods
+      security:
+        - ClerkSession: []
+      responses:
+        "200":
+          description: Payment methods
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PaymentMethod"
+    post:
+      operationId: createPaymentMethod
+      tags: [admin]
+      summary: Add a payment method and public receiving address
+      security:
+        - ClerkSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PaymentMethodInput"
+      responses:
+        "201":
+          description: Created payment method
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentMethod"
+  /admin/payment-methods/{id}:
+    patch:
+      operationId: updatePaymentMethod
+      tags: [admin]
+      summary: Edit a payment method
+      security:
+        - ClerkSession: []
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PaymentMethodInput"
+      responses:
+        "200":
+          description: Updated payment method
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentMethod"
+    delete:
+      operationId: deletePaymentMethod
+      tags: [admin]
+      summary: Delete a payment method
+      security:
+        - ClerkSession: []
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "204":
+          description: Payment method deleted
+  /admin/faqs:
+    get:
+      operationId: listAdminFaqs
+      tags: [admin]
+      summary: List all FAQ entries
+      security:
+        - ClerkSession: []
+      responses:
+        "200":
+          description: FAQ entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Faq"
+    post:
+      operationId: createFaq
+      tags: [admin]
+      summary: Create an FAQ entry
+      security:
+        - ClerkSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FaqInput"
+      responses:
+        "201":
+          description: Created FAQ entry
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Faq"
+  /admin/faqs/{id}:
+    patch:
+      operationId: updateFaq
+      tags: [admin]
+      summary: Edit an FAQ entry
+      security:
+        - ClerkSession: []
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FaqInput"
+      responses:
+        "200":
+          description: Updated FAQ entry
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Faq"
+    delete:
+      operationId: deleteFaq
+      tags: [admin]
+      summary: Delete an FAQ entry
+      security:
+        - ClerkSession: []
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "204":
+          description: FAQ entry deleted
+  /admin/testimonials:
+    get:
+      operationId: listAdminTestimonials
+      tags: [admin]
+      summary: List testimonials and clearly marked examples
+      security:
+        - ClerkSession: []
+      responses:
+        "200":
+          description: Testimonials
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Testimonial"
+    post:
+      operationId: createTestimonial
+      tags: [admin]
+      summary: Add verified customer feedback
+      security:
+        - ClerkSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TestimonialInput"
+      responses:
+        "201":
+          description: Created testimonial
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Testimonial"
+  /admin/testimonials/{id}:
+    patch:
+      operationId: updateTestimonial
+      tags: [admin]
+      summary: Edit or verify a testimonial
+      security:
+        - ClerkSession: []
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TestimonialInput"
+      responses:
+        "200":
+          description: Updated testimonial
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Testimonial"
+    delete:
+      operationId: deleteTestimonial
+      tags: [admin]
+      summary: Delete a testimonial
+      security:
+        - ClerkSession: []
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "204":
+          description: Testimonial deleted
+  /admin/media:
+    get:
+      operationId: listAdminMedia
+      tags: [admin]
+      summary: List trader stories and announcements
+      security:
+        - ClerkSession: []
+      responses:
+        "200":
+          description: Media items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MediaItem"
+    post:
+      operationId: createMedia
+      tags: [admin]
+      summary: Add a media item by its hosted URL
+      security:
+        - ClerkSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MediaInput"
+      responses:
+        "201":
+          description: Created media item
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MediaItem"
+  /admin/media/{id}:
+    patch:
+      operationId: updateMedia
+      tags: [admin]
+      summary: Edit a media item
+      security:
+        - ClerkSession: []
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MediaInput"
+      responses:
+        "200":
+          description: Updated media item
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MediaItem"
+    delete:
+      operationId: deleteMedia
+      tags: [admin]
+      summary: Delete a media item
+      security:
+        - ClerkSession: []
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "204":
+          description: Media item deleted
+  /admin/statistics:
+    get:
+      operationId: listAdminStatistics
+      tags: [admin]
+      summary: List configurable website statistics
+      security:
+        - ClerkSession: []
+      responses:
+        "200":
+          description: Website statistics
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SiteStatistic"
+    put:
+      operationId: replaceAdminStatistics
+      tags: [admin]
+      summary: Replace website statistics and verification flags
+      security:
+        - ClerkSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StatisticsInput"
+      responses:
+        "200":
+          description: Updated statistics
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SiteStatistic"
+  /admin/settings:
+    get:
+      operationId: getAdminSettings
+      tags: [admin]
+      summary: Get website and legal-page settings
+      security:
+        - ClerkSession: []
+      responses:
+        "200":
+          description: Site settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SiteSettings"
+    put:
+      operationId: updateAdminSettings
+      tags: [admin]
+      summary: Update website and legal-page settings
+      security:
+        - ClerkSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SiteSettingsInput"
+      responses:
+        "200":
+          description: Updated site settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SiteSettings"
 components:
+  securitySchemes:
+    ClerkSession:
+      type: apiKey
+      in: cookie
+      name: __session
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    OrderId:
+      name: orderId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
   schemas:
     HealthStatus:
       type: object
@@ -33,4 +622,287 @@ components:
           type: string
       required:
         - status
+    Challenge:
+      type: object
+      required: [id, displayName, accountSize, price, description, rulesSummary, enabled, launchOffer, sortOrder]
+      properties:
+        id: { type: string, format: uuid }
+        displayName: { type: string }
+        accountSize: { type: string }
+        price: { type: number }
+        description: { type: string }
+        rulesSummary: { type: string }
+        enabled: { type: boolean }
+        launchOffer: { type: boolean }
+        sortOrder: { type: integer }
+    ChallengeInput:
+      type: object
+      required: [displayName, accountSize, price, description, rulesSummary, enabled, launchOffer, sortOrder]
+      properties:
+        displayName: { type: string, minLength: 1 }
+        accountSize: { type: string, minLength: 1 }
+        price: { type: number, minimum: 0 }
+        description: { type: string }
+        rulesSummary: { type: string }
+        enabled: { type: boolean }
+        launchOffer: { type: boolean }
+        sortOrder: { type: integer }
+    Faq:
+      type: object
+      required: [id, question, answer, sortOrder, published]
+      properties:
+        id: { type: string, format: uuid }
+        question: { type: string }
+        answer: { type: string }
+        sortOrder: { type: integer }
+        published: { type: boolean }
+    FaqInput:
+      type: object
+      required: [question, answer, sortOrder, published]
+      properties:
+        question: { type: string, minLength: 1 }
+        answer: { type: string }
+        sortOrder: { type: integer }
+        published: { type: boolean }
+    Testimonial:
+      type: object
+      required: [id, customerName, quote, verified, published, demo]
+      properties:
+        id: { type: string, format: uuid }
+        customerName: { type: string }
+        quote: { type: string }
+        verified: { type: boolean }
+        published: { type: boolean }
+        demo: { type: boolean }
+    TestimonialInput:
+      type: object
+      required: [customerName, quote, verified, published, demo]
+      properties:
+        customerName: { type: string, minLength: 1 }
+        quote: { type: string }
+        verified: { type: boolean }
+        published: { type: boolean }
+        demo: { type: boolean }
+    MediaItem:
+      type: object
+      required: [id, title, kind, caption, assetUrl, published, demo, sortOrder]
+      properties:
+        id: { type: string, format: uuid }
+        title: { type: string }
+        kind: { type: string, enum: [video, screenshot, story, announcement] }
+        caption: { type: string }
+        assetUrl: { type: ["string", "null"], format: uri }
+        published: { type: boolean }
+        demo: { type: boolean }
+        sortOrder: { type: integer }
+    MediaInput:
+      type: object
+      required: [title, kind, caption, published, demo, sortOrder]
+      properties:
+        title: { type: string, minLength: 1 }
+        kind: { type: string, enum: [video, screenshot, story, announcement] }
+        caption: { type: string }
+        assetUrl: { type: ["string", "null"], format: uri }
+        published: { type: boolean }
+        demo: { type: boolean }
+        sortOrder: { type: integer }
+    SiteStatistic:
+      type: object
+      required: [id, label, value, verified, visible, sortOrder]
+      properties:
+        id: { type: string, format: uuid }
+        label: { type: string }
+        value: { type: string }
+        verified: { type: boolean }
+        visible: { type: boolean }
+        sortOrder: { type: integer }
+    StatisticsInput:
+      type: object
+      required: [statistics]
+      properties:
+        statistics:
+          type: array
+          items:
+            type: object
+            required: [label, value, verified, visible, sortOrder]
+            properties:
+              label: { type: string }
+              value: { type: string }
+              verified: { type: boolean }
+              visible: { type: boolean }
+              sortOrder: { type: integer }
+    SiteSettings:
+      type: object
+      required: [companyName, logoText, supportEmail, socialLinks, termsContent, privacyContent]
+      properties:
+        companyName: { type: string }
+        logoText: { type: string }
+        supportEmail: { type: string }
+        socialLinks:
+          type: array
+          items:
+            type: object
+            required: [label, url]
+            properties:
+              label: { type: string }
+              url: { type: string, format: uri }
+        termsContent: { type: string }
+        privacyContent: { type: string }
+    SiteSettingsInput:
+      type: object
+      required: [companyName, logoText, supportEmail, socialLinks, termsContent, privacyContent]
+      properties:
+        companyName: { type: string }
+        logoText: { type: string }
+        supportEmail: { type: string }
+        socialLinks:
+          type: array
+          items:
+            type: object
+            required: [label, url]
+            properties:
+              label: { type: string }
+              url: { type: string, format: uri }
+        termsContent: { type: string }
+        privacyContent: { type: string }
+    PaymentMethod:
+      type: object
+      required: [id, currency, network, walletAddress, enabled, instructions, updatedAt]
+      properties:
+        id: { type: string, format: uuid }
+        currency: { type: string }
+        network: { type: string }
+        walletAddress: { type: string }
+        enabled: { type: boolean }
+        instructions: { type: string }
+        updatedAt: { type: string, format: date-time }
+    PaymentMethodInput:
+      type: object
+      required: [currency, network, walletAddress, enabled, instructions]
+      properties:
+        currency: { type: string, minLength: 1 }
+        network: { type: string, minLength: 1 }
+        walletAddress: { type: string, minLength: 1 }
+        enabled: { type: boolean }
+        instructions: { type: string }
+    OrderStatus:
+      type: string
+      enum: [PENDING, PAYMENT_SUBMITTED, UNDER_REVIEW, PAID, REJECTED, REFUNDED, CANCELLED]
+    Order:
+      type: object
+      required: [id, fullName, email, country, phone, challengeId, challengeName, accountSize, price, paymentMethodId, cryptoAmount, currency, network, paymentAddress, transactionHash, paymentStatus, createdAt, updatedAt]
+      properties:
+        id: { type: string, format: uuid }
+        fullName: { type: string }
+        email: { type: string, format: email }
+        country: { type: string }
+        phone: { type: ["string", "null"] }
+        challengeId: { type: string, format: uuid }
+        challengeName: { type: string }
+        accountSize: { type: string }
+        price: { type: number }
+        paymentMethodId: { type: ["string", "null"], format: uuid }
+        cryptoAmount: { type: ["number", "null"] }
+        currency: { type: ["string", "null"] }
+        network: { type: ["string", "null"] }
+        paymentAddress: { type: ["string", "null"] }
+        transactionHash: { type: ["string", "null"] }
+        paymentStatus: { $ref: "#/components/schemas/OrderStatus" }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    OrderInput:
+      type: object
+      required: [fullName, email, country, challengeId]
+      properties:
+        fullName: { type: string, minLength: 2, maxLength: 160 }
+        email: { type: string, format: email, maxLength: 320 }
+        country: { type: string, minLength: 2, maxLength: 100 }
+        phone: { type: ["string", "null"], maxLength: 40 }
+        challengeId: { type: string, format: uuid }
+    OrderPayment:
+      type: object
+      required: [id, challengeName, accountSize, price, paymentStatus, currency, network, paymentAddress, instructions, paymentOptions]
+      properties:
+        id: { type: string, format: uuid }
+        challengeName: { type: string }
+        accountSize: { type: string }
+        price: { type: number }
+        paymentStatus: { $ref: "#/components/schemas/OrderStatus" }
+        currency: { type: ["string", "null"] }
+        network: { type: ["string", "null"] }
+        paymentAddress: { type: ["string", "null"] }
+        instructions: { type: ["string", "null"] }
+        paymentOptions:
+          type: array
+          items: { $ref: "#/components/schemas/PaymentQuote" }
+    PaymentQuote:
+      type: object
+      required: [paymentMethodId, currency, network, walletAddress, instructions, amount, quoteUpdatedAt, quoteSource, quoteToken]
+      properties:
+        paymentMethodId: { type: string, format: uuid }
+        currency: { type: string }
+        network: { type: string }
+        walletAddress: { type: string }
+        instructions: { type: string }
+        amount: { type: number }
+        quoteUpdatedAt: { type: string, format: date-time }
+        quoteSource: { type: string }
+        quoteToken: { type: string }
+    PaymentSubmissionInput:
+      type: object
+      required: [currency, network, transactionHash, quoteToken]
+      properties:
+        currency: { type: string, minLength: 2, maxLength: 12 }
+        network: { type: string, minLength: 2, maxLength: 40 }
+        transactionHash: { type: string, minLength: 8, maxLength: 200 }
+        quoteToken: { type: string, minLength: 32, maxLength: 4096 }
+    OrderStatusUpdate:
+      type: object
+      required: [paymentStatus]
+      properties:
+        paymentStatus: { $ref: "#/components/schemas/OrderStatus" }
+    PublicSite:
+      type: object
+      required: [companyName, logoText, supportEmail, socialLinks, termsContent, privacyContent, challenges, faqs, testimonials, media, statistics]
+      properties:
+        companyName: { type: string }
+        logoText: { type: string }
+        supportEmail: { type: string }
+        socialLinks:
+          type: array
+          items:
+            type: object
+            required: [label, url]
+            properties:
+              label: { type: string }
+              url: { type: string, format: uri }
+        termsContent: { type: string }
+        privacyContent: { type: string }
+        challenges:
+          type: array
+          items: { $ref: "#/components/schemas/Challenge" }
+        faqs:
+          type: array
+          items: { $ref: "#/components/schemas/Faq" }
+        testimonials:
+          type: array
+          items: { $ref: "#/components/schemas/Testimonial" }
+        media:
+          type: array
+          items: { $ref: "#/components/schemas/MediaItem" }
+        statistics:
+          type: array
+          items: { $ref: "#/components/schemas/SiteStatistic" }
+    AdminDashboard:
+      type: object
+      required: [totalOrders, pendingPayments, paidOrders, rejectedOrders, revenue, recentOrders]
+      properties:
+        totalOrders: { type: integer }
+        pendingPayments: { type: integer }
+        paidOrders: { type: integer }
+        rejectedOrders: { type: integer }
+        revenue: { type: number }
+        recentOrders:
+          type: array
+          items: { $ref: "#/components/schemas/Order" }
 

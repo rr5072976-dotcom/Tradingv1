@@ -1,0 +1,179 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum OrderStatus {
+  PENDING
+  PAYMENT_SUBMITTED
+  UNDER_REVIEW
+  PAID
+  REJECTED
+  REFUNDED
+  CANCELLED
+}
+
+model User {
+  id          String   @id @default(uuid()) @db.Uuid
+  clerkUserId String   @unique @map("clerk_user_id")
+  email       String   @unique
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+model Admin {
+  id          String   @id @default(uuid()) @db.Uuid
+  clerkUserId String   @unique @map("clerk_user_id")
+  email       String   @unique
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@map("admins")
+}
+
+model Challenge {
+  id           String   @id @default(uuid()) @db.Uuid
+  displayName  String   @map("display_name")
+  accountSize  String   @map("account_size")
+  price        Decimal  @db.Decimal(12, 2)
+  description  String   @db.Text
+  rulesSummary String   @map("rules_summary") @db.Text
+  enabled      Boolean  @default(true)
+  launchOffer  Boolean  @default(false) @map("launch_offer")
+  sortOrder    Int      @default(0) @map("sort_order")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+  orders       Order[]
+
+  @@index([enabled, sortOrder])
+  @@map("challenges")
+}
+
+model Order {
+  id              String      @id @default(uuid()) @db.Uuid
+  fullName        String      @map("full_name")
+  email           String
+  country         String
+  phone           String?
+  challengeId     String      @map("challenge_id") @db.Uuid
+  challengeName   String      @map("challenge_name")
+  accountSize     String      @map("account_size")
+  price           Decimal     @db.Decimal(12, 2)
+  paymentMethodId String?     @map("payment_method_id") @db.Uuid
+  cryptoAmount    Decimal?    @map("crypto_amount") @db.Decimal(24, 10)
+  currency        String?
+  network         String?
+  paymentAddress  String?     @map("payment_address")
+  transactionHash String?     @map("transaction_hash")
+  paymentStatus   OrderStatus @default(PENDING) @map("payment_status")
+  createdAt       DateTime    @default(now()) @map("created_at")
+  updatedAt       DateTime    @updatedAt @map("updated_at")
+  challenge       Challenge   @relation(fields: [challengeId], references: [id], onDelete: Restrict)
+
+  @@index([paymentStatus, createdAt])
+  @@index([email])
+  @@map("orders")
+}
+
+model PaymentMethod {
+  id            String   @id @default(uuid()) @db.Uuid
+  currency      String
+  network       String
+  walletAddress String   @map("wallet_address")
+  enabled       Boolean  @default(false)
+  instructions  String   @db.Text
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@unique([currency, network])
+  @@map("payment_methods")
+}
+
+model Faq {
+  id        String   @id @default(uuid()) @db.Uuid
+  question  String
+  answer    String   @db.Text
+  sortOrder Int      @default(0) @map("sort_order")
+  published Boolean  @default(false)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([published, sortOrder])
+  @@map("faqs")
+}
+
+model Testimonial {
+  id           String   @id @default(uuid()) @db.Uuid
+  customerName String   @map("customer_name")
+  quote        String   @db.Text
+  verified     Boolean  @default(false)
+  published    Boolean  @default(false)
+  demo         Boolean  @default(true)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@index([published, verified])
+  @@map("testimonials")
+}
+
+model MediaItem {
+  id        String   @id @default(uuid()) @db.Uuid
+  title     String
+  kind      String
+  caption   String   @db.Text
+  assetUrl  String?  @map("asset_url")
+  published Boolean  @default(false)
+  demo      Boolean  @default(true)
+  sortOrder Int      @default(0) @map("sort_order")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([published, sortOrder])
+  @@map("media_items")
+}
+
+model SiteStatistic {
+  id        String   @id @default(uuid()) @db.Uuid
+  label     String
+  value     String
+  verified  Boolean  @default(false)
+  visible   Boolean  @default(false)
+  sortOrder Int      @default(0) @map("sort_order")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("site_statistics")
+}
+
+model SiteSetting {
+  id             String   @id @default("global")
+  companyName    String   @default("BLACK Trading") @map("company_name")
+  logoText       String   @default("BLACK Trading") @map("logo_text")
+  supportEmail   String   @default("") @map("support_email")
+  socialLinks    Json     @default("[]") @map("social_links")
+  termsContent   String   @default("") @map("terms_content") @db.Text
+  privacyContent String   @default("") @map("privacy_content") @db.Text
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  @@map("site_settings")
+}
+
+model AuditLog {
+  id           String   @id @default(uuid()) @db.Uuid
+  actorClerkId String   @map("actor_clerk_id")
+  actorEmail   String   @map("actor_email")
+  action       String
+  entityType   String   @map("entity_type")
+  entityId     String   @map("entity_id")
+  details      Json?
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@index([createdAt])
+  @@index([entityType, entityId])
+  @@map("audit_logs")
+}

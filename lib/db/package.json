@@ -8,13 +8,16 @@
     "./schema": "./src/schema/index.ts"
   },
   "scripts": {
-    "push": "drizzle-kit push --config ./drizzle.config.ts",
-    "push-force": "drizzle-kit push --force --config ./drizzle.config.ts"
+    "generate": "prisma generate --schema ./prisma/schema.prisma",
+    "push": "prisma db push --schema ./prisma/schema.prisma",
+    "seed": "node ./prisma/seed.mjs"
   },
   "dependencies": {
+    "@prisma/client": "^6.19.3",
     "drizzle-orm": "catalog:",
     "drizzle-zod": "^0.8.3",
     "pg": "^8.23.0",
+    "prisma": "^6.19.3",
     "zod": "catalog:"
   },
   "devDependencies": {
